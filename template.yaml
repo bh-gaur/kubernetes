@@ -1,0 +1,88 @@
+# template.yaml - Backstage Software Template Schema
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: dynamic-env-provisioner
+  title: Self-Service Testing/Staging Environment
+  description: Automatically provisions an isolated K8s namespace, registers database dependencies, and configures Helm chart values.
+spec:
+  owner: devops-core-team
+  type: environment
+
+  parameters:
+    - title: Basic Environment Metadata
+      required:
+        - environmentName
+        - ownerTeam
+        - lifecycle
+      properties:
+        environmentName:
+          title: Environment Subdomain Name
+          type: string
+          description: Unique alphanumeric slug used for naming namespaces and DNS routing.
+          pattern: '^[a-z0-9\-]+$'
+        ownerTeam:
+          title: Owner Team
+          type: string
+          description: Select the engineering squad responsible for resource ownership and cost tracking.
+          enum:
+            - alpha-squad
+            - billing-dev
+            - platform-eng
+        lifecycle:
+          title: Environment Lifecycle
+          type: string
+          default: testing
+          enum:
+            - testing
+            - staging
+
+    - title: Cluster Resource Allocation
+      required:
+        - cpuAllocation
+        - memoryAllocation
+        - deployMockDatabase
+      properties:
+        cpuAllocation:
+          title: CPU Allocation Core Limit
+          type: string
+          default: "2"
+          enum: ["1", "2", "4"]
+        memoryAllocation:
+          title: Memory Limit Allocation
+          type: string
+          default: 4Gi
+          enum: ["2Gi", "4Gi", "8Gi"]
+        deployMockDatabase:
+          title: Deploy Ephemeral PostgreSQL Instance
+          type: boolean
+          default: false
+
+  steps:
+    - id: fetch-template-structures
+      name: Fetching Base Infrastructure Blueprints
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          envName: ${{ parameters.environmentName }}
+          team: ${{ parameters.ownerTeam }}
+          tier: ${{ parameters.lifecycle }}
+          cpu: ${{ parameters.cpuAllocation }}
+          memory: ${{ parameters.memoryAllocation }}
+          dbEnabled: ${{ parameters.deployMockDatabase }}
+
+    - id: publish-to-git
+      name: Publishing Blueprint State to Git Control Plane
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: Infrastructure State Repo for env-${{ parameters.environmentName }}
+        repoUrl: 'github.com?repo=env-${{ parameters.environmentName }}&owner=${{ parameters.ownerTeam }}'
+
+    - id: catalog-register
+      name: Registering Environment within Backstage Service Catalog
+      action: catalog:register
+      input:
+        repoUrl: 'github.com?repo=env-${{ parameters.environmentName }}&owner=${{ parameters.ownerTeam }}'
+        catalogInfoPath: '/catalog-info.yaml'

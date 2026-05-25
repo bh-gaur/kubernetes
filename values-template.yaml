@@ -1,0 +1,37 @@
+# values.template.yaml
+global:
+  environmentContext: "${{ tier }}"
+  billingCode: "${{ team }}"
+
+replicaCount: 2
+
+image:
+  repository: internal-registry.corp/apps/runtime-base
+  tag: "stable"
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: "${{ cpu }}00m"
+    memory: "${{ memory }}"
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+  hosts:
+    - host: "${{ envName }}.internal.dev.platform"
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+
+# Dependent Sub-Chart activation triggered by boolean checkbox values
+postgresql:
+  enabled: ${{ dbEnabled }}
+  auth:
+    database: "app_db"
+    username: "db_user"
