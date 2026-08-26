@@ -79,6 +79,22 @@ This folder includes helper utilities for Kubernetes development:
 - **[`setup_aliases.sh`](file:///Users/vishnu/learning/b_github/z_etc/kubernetes/setup_aliases.sh)**: Script to permanently enable `kubectl_alias` in your shell profile (`~/.zshrc` / `~/.bashrc`).
 - **[`nginx-pod.yaml`](file:///Users/vishnu/learning/b_github/z_etc/kubernetes/nginx-pod.yaml)**: Manifest to create a standard Nginx Pod in Kubernetes.
 - **[`argocd-app.yaml`](file:///Users/vishnu/learning/b_github/z_etc/kubernetes/argocd-app.yaml)**: Argo CD `Application` custom resource manifest for automated GitOps deployment.
+- **[`kustomize/kustomize.md`](file:///Users/vishnu/learning/b_github/z_etc/kubernetes/kustomize/kustomize.md)**: Detailed Kustomize documentation guide (concepts, usage, when to use, directory structures, and commands).
+
+---
+
+## 🎨 Kustomize Overview
+
+Learn how to manage multi-environment Kubernetes configurations template-free using Kustomize:
+See the complete guide at **[`kustomize.md`](file:///Users/vishnu/learning/b_github/z_etc/kubernetes/kustomize/kustomize.md)**.
+
+```bash
+# Preview kustomize build
+kubectl kustomize <directory>
+
+# Apply kustomize overlay to cluster
+kubectl apply -k <directory>
+```
 
 ---
 
