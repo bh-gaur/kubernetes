@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sample-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/bh-gaur/helm_learn.git' # Replace with your Git repository URL
+    targetRevision: HEAD
+    path: helm_learn/python-app/charts                   # Path to Helm chart or Kubernetes manifests directory
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: 'https://kubernetes.default.svc'                     # Target Kubernetes API server
+    namespace: default                                           # Target namespace in Kubernetes
+  syncPolicy:
+    automated:
+      prune: true                                                # Automatically delete resources removed from Git
+      selfHeal: true                                             # Automatically sync manual cluster overrides back to Git state
+    syncOptions:
+      - CreateNamespace=true
+
